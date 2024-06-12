@@ -3,7 +3,9 @@
     Add-AADUsersFromCSV.ps1
 
     .DESCRIPTION
-    Dodawanie użytkowników z pliku CSV
+    Dodawanie użytkowników z pliku CSV do określonej grupy - użytkowników z oznaczonym niewłaściwym telefonem oraz nieposiadających telefony
+    Przed użyciem skonfiguruj właściwe uprawnienia na Graph API i we właściwy sposób użyj Connect-MgGraph. Wymagany scope: Application.ReadWrite.All, Directory.Read.All, GroupMember.ReadWrite.All, User.Read.All
+    Ustaw właściwe ID grupy Entra ID w linii 28.
 
     .LINK
     #
