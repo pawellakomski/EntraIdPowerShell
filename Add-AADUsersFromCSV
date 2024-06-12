@@ -1,0 +1,31 @@
+<#
+    .SYNOPSIS
+    Add-AADUsersFromCSV.ps1
+
+    .DESCRIPTION
+    Dodawanie użytkowników z pliku CSV
+
+    .LINK
+    #
+
+    .NOTES
+    Autor:      Paweł Łakomski
+#>
+
+# Przed użyciem skonfiguruj właściwe uprawnienia na Graph API i we właściwy sposób użyj Connect-MgGraph. Wymagany scope: Application.ReadWrite.All, Directory.Read.All, GroupMember.ReadWrite.All, User.Read.All
+# Connect-MgGraph
+
+$users = Import-CSV -Path c:\temp\users.csv -Header 'user','telefon','nophone' -Delimiter ';'
+
+foreach ($user in $users)
+{
+
+    if (($user.telefon -eq '') -or ($user.nophone -eq 'tak')) 
+    {
+        $id = Get-MgUser -All -Filter "UserPrincipalName eq '$($user.user)'"
+        New-MgGroupMember -GroupId '68fa1256-8c38-42b3-a1c2-b22939758671' -DirectoryObjectId $id.id
+    }
+
+}
+
+Disconnect-MgGraph
