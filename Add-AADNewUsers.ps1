@@ -6,6 +6,8 @@
     Dodawanie użytkowników utworzonych w przeciągu ostatnich 24h do okreslonej grupy AAD. Przed użyciem skonfiguruj właściwe uprawnienia na Graph API i we właściwy sposób użyj Connect-MgGraph. Wymagany scope: Application.ReadWrite.All, Directory.Read.All, GroupMember.ReadWrite.All, User.Read.All
     Ustaw właściwe ID grupy Entra ID w linii 25.
 
+    OPROGRAMOWANIE JEST DOSTARCZANE W STANIE, W JAKIM SIĘ ZNAJDUJE, BEZ JAKIEJKOLWIEK GWARANCJI, WYRAŹNEJ LUB DOROZUMIANEJ, W TYM MIĘDZY INNYMI GWARANCJI PRZYDATNOŚCI HANDLOWEJ, PRZYDATNOŚCI DO OKREŚLONEGO CELU I NIENARUSZANIA PRAW.
+
     .LINK
     #
 
