@@ -32,7 +32,7 @@ $allUsers = $users.Count
 
 Write-Host "Petla"
 # Dla każdego użytkownika na podstawie informacji z profilu
-foreach ($index in 0..5000) {
+foreach ($index in 0..$allUsers) {
     $user = $users[$index]
 
     # Zarządzanie paskiem postępu
@@ -41,7 +41,6 @@ foreach ($index in 0..5000) {
     $barParameters = @{
         Activity        = "Przetwarzanie uzytkownikow"
         Status          = "Uzytkownik nr $($index + 1) z $allUsers - $($user.userPrincipalName) - Ukonczono $($procent -as [int])%"
-        PercentComplete = $procent
     }
     Write-Progress @barParameters
 
