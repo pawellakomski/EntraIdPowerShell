@@ -27,12 +27,12 @@ $userObjects = @()
 
 # Zebranie info o wszystkich użytkownikach i policzenie użytkowników
 Write-Host "Pobieranie uzytkownikow"
-$users = Get-MgBetaUser @parametryUser
+$users = Get-MgBetaUser @parametryUser -top 100
 $allUsers = $users.Count
 
 Write-Host "Petla"
 # Dla każdego użytkownika na podstawie informacji z profilu
-foreach ($index in 0..100) {
+foreach ($index in 0..$allUsers) {
     $user = $users[$index]
 
     # Zarządzanie paskiem postępu
