@@ -18,7 +18,7 @@ Connect-MgGraph -Scopes "User.Read.All"
 
 # Zmienne pomocnicze
 $log = Get-Date -f yyyyMMddhhmm
-$plikCSV = "C:\temp\users-$log.csv"
+$plikCSV = "users-$log.csv"
 $parametryUser = @{
     All = $true
 }
