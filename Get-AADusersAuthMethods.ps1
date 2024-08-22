@@ -14,7 +14,7 @@
 #>
 
 # Podłączenie do API Graph
-Connect-MgGraph -Scopes "User.Read.All"
+Connect-MgGraph -Scopes "User.Read.All, UserAuthenticationMethod.Read.All"
 
 # Zmienne pomocnicze
 $log = Get-Date -f yyyyMMddhhmm
@@ -44,6 +44,8 @@ foreach ($index in 0..$allUsers) {
     }
     Write-Progress @barParameters
 
+    $MFAData=Get-MgUserAuthenticationMethod -UserId $user.userPrincipalName
+    
     # Tworzymy obiekt użytkownika z danymi z 
     $userObject = [PSCustomObject]@{
         "Imie"                      = $user.givenName
@@ -62,7 +64,57 @@ foreach ($index in 0..$allUsers) {
         "Data stworzenia konta"     = $user.createdDateTime
         "Ostatnie logowanie"        = if ($user.SignInActivity.LastSuccessfulSignInDateTime) { $user.SignInActivity.LastSuccessfulSignInDateTime } else { "No sign in" }
         "Licencja"                  = if ($user.assignedLicenses.Count -gt 0) { "Tak" } else { "Nie" }
+        "MFAstatus"                 = "_"
+        "email"                     = "-"
+        "fido2"                     = "-"
+        "app"                       = "-"
+        "password"                  = "-"
+        "phone"                     = "-"
+        "softwareoath"              = "-"
+        "tempaccess"                = "-"
+        "hellobusiness"             = "-"
     }
+
+     ForEach ($method in $MFAData) {
+    
+        Switch ($method.AdditionalProperties["@odata.type"]) {
+          "#microsoft.graph.emailAuthenticationMethod"  { 
+             $userObject.email = $true 
+             $userObject.MFAstatus = "Enabled"
+          } 
+          "#microsoft.graph.fido2AuthenticationMethod"                   { 
+            $userObject.fido2 = $true 
+            $userObject.MFAstatus = "Enabled"
+          }    
+          "#microsoft.graph.microsoftAuthenticatorAuthenticationMethod"  { 
+            $userObject.app = $true 
+            $userObject.MFAstatus = "Enabled"
+          }    
+          "#microsoft.graph.passwordAuthenticationMethod"                {              
+                $userObject.password = $true 
+                # Jeśli jest tylko hasło, to MFA nie jest włączone
+                if($userObject.MFAstatus -ne "Enabled")
+                {
+                    $userObject.MFAstatus = "Disabled"
+                }                
+           }     
+           "#microsoft.graph.phoneAuthenticationMethod"  { 
+            $userObject.phone = $true 
+            $userObject.MFAstatus = "Enabled"
+          }   
+            "#microsoft.graph.softwareOathAuthenticationMethod"  { 
+            $userObject.softwareoath = $true 
+            $userObject.MFAstatus = "Enabled"
+          }           
+            "#microsoft.graph.temporaryAccessPassAuthenticationMethod"  { 
+            $userObject.tempaccess = $true 
+            $userObject.MFAstatus = "Enabled"
+          }           
+            "#microsoft.graph.windowsHelloForBusinessAuthenticationMethod"  { 
+            $userObject.hellobusiness = $true 
+            $userObject.MFAstatus = "Enabled"
+          }                   
+        }
 
     # Dodanie bieżącego użytkownika do kolekcji
     $userObjects += $userObject
