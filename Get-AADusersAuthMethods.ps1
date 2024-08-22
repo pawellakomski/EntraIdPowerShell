@@ -29,6 +29,7 @@ $userObjects = @()
 Write-Host "Pobieranie uzytkownikow"
 $users = Get-MgBetaUser @parametryUser
 $allUsers = $users.Count
+$allUsers = $allUsers-1
 
 Write-Host "Petla"
 # Dla każdego użytkownika na podstawie informacji z profilu
