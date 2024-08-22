@@ -21,9 +21,12 @@
 #ilosc dni wstecz, które sprawdzamy - do ustalenia/sprawdzenia
 $wczoraj = (Get-date).AddDays(-2).ToString("yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'")
 $users = Get-MgUser -All -Filter "CreatedDateTime ge $wczoraj"
+$ilu - $users.Count
+Write-Host "Znaleziono $ilu uzytkownikow"
 
 foreach($user in $users)
 {
+    Write-Host "Dodaję $user.userPrincipalName" do grupy...
     New-MgGroupMember -GroupId '68fa1256-8c38-42b3-a1c2-b22939758671' -DirectoryObjectId $user.Id
 }
 
