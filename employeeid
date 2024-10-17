@@ -1,0 +1,14 @@
+$users = Get-ADUser -Filter {employeeid -like "*"} -Properties * | select UserPrincipalName, employeeid
+
+foreach($user in $users)
+{
+
+    $customSecurityAttributes = @{
+        "allUsers" = @{
+            "@odata.type" = "#Microsoft.DirectoryServices.CustomSecurityAttributeValue"
+            "empid" = $user.employeeid
+        }
+    }
+    Update-MgUser -UserId $user.UserPrincipalName -CustomSecurityAttributes $customSecurityAttributes
+
+}
