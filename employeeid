@@ -1,3 +1,5 @@
+Connect-MgGraph -Scopes CustomSecAttributeAssignment.ReadWrite.All,User.Read.All
+
 $users = Get-ADUser -Filter {employeeid -like "*"} -Properties * | select UserPrincipalName, employeeid
 
 foreach($user in $users)
