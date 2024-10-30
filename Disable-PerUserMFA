@@ -1,0 +1,11 @@
+Connect-MgGraph -Scopes "User.Read.All", "Policy.ReadWrite.AuthenticationMethod"
+
+$users = Import-CSV -Path c:\temp\users.csv -Header 'user' -Delimiter ';'
+$body = @{"perUserMfaState" = "disabled" }
+
+foreach ($user in $users)
+{
+    $userid = Get-MgUser -userid $user.user | select id
+    $id = $userid.id
+    Invoke-MgGraphRequest -Method PATCH -Uri "/beta/users/$id/authentication/requirements" -Body $body
+}
