@@ -1,0 +1,92 @@
+function DeleteAuthMethod($uid, $method){
+    switch ($method.AdditionalProperties['@odata.type']) {
+        '#microsoft.graph.fido2AuthenticationMethod' { 
+            Write-Host 'Removing fido2AuthenticationMethod'
+            Remove-MgUserAuthenticationFido2Method -UserId $uid -Fido2AuthenticationMethodId $method.Id
+        }
+        '#microsoft.graph.emailAuthenticationMethod' { 
+            Write-Host 'Removing emailAuthenticationMethod'
+            Remove-MgUserAuthenticationEmailMethod -UserId $uid -EmailAuthenticationMethodId $method.Id
+        }
+        '#microsoft.graph.microsoftAuthenticatorAuthenticationMethod' { 
+            Write-Host 'Removing microsoftAuthenticatorAuthenticationMethod'
+            Remove-MgUserAuthenticationMicrosoftAuthenticatorMethod -UserId $uid -MicrosoftAuthenticatorAuthenticationMethodId $method.Id
+        }
+        '#microsoft.graph.phoneAuthenticationMethod' { 
+            Write-Host 'Removing phoneAuthenticationMethod'
+            Remove-MgUserAuthenticationPhoneMethod -UserId $uid -PhoneAuthenticationMethodId $method.Id
+        }
+        '#microsoft.graph.softwareOathAuthenticationMethod' { 
+            Write-Host 'Removing softwareOathAuthenticationMethod'
+            Remove-MgUserAuthenticationSoftwareOathMethod -UserId $uid -SoftwareOathAuthenticationMethodId $method.Id
+        }
+        '#microsoft.graph.temporaryAccessPassAuthenticationMethod' { 
+            Write-Host 'Removing temporaryAccessPassAuthenticationMethod'
+            Remove-MgUserAuthenticationTemporaryAccessPassMethod -UserId $uid -TemporaryAccessPassAuthenticationMethodId $method.Id
+        }
+        '#microsoft.graph.windowsHelloForBusinessAuthenticationMethod' { 
+            Write-Host 'Removing windowsHelloForBusinessAuthenticationMethod'
+            Remove-MgUserAuthenticationWindowsHelloForBusinessMethod -UserId $uid -WindowsHelloForBusinessAuthenticationMethodId $method.Id
+        }
+        '#microsoft.graph.passwordAuthenticationMethod' { 
+            # Hasla jako metody nie mozna usunac
+        }        
+        Default {
+            Write-Host 'This script does not handle removing this auth method type: ' + $method.AdditionalProperties['@odata.type']
+        }
+    }
+    return $? # Return true if no error and false if there is an error
+}
+
+
+Connect-MgGraph -Scopes "User.Read.All", "UserAuthenticationMethod.ReadWrite.All"
+
+
+$users = Import-CSV -Path c:\temp\users.csv -Header 'user' -Delimiter ';'
+
+$allUsers = $users.Count
+$allUsers1 = $allUsers-1
+
+
+$body = @{"perUserMfaState" = "disabled" }
+$bar = 0
+
+foreach ($index in 0..$allUsers1)
+{
+    $user = $users[$index]
+
+    $user = $user.user
+    
+    $procent = ($bar / $allUsers) * 100
+    $barParameters = @{
+        Activity        = "Przetwarzanie uzytkownikow"
+        Status          = "Uzytkownik nr $($index+1) z $allUsers - $($user) - Ukonczono $($procent -as [int])%"
+    }
+    Write-Progress @barParameters
+    $bar++
+
+    $methods = Get-MgUserAuthenticationMethod -UserId $user
+    # -1 bo tez jest haslo
+    Write-Host "Znaleziono $($methods.Length - 1) metody MFA dla uzytkownika $user"
+
+    $defaultMethod = $null
+    foreach ($authMethod in $methods) {
+        $deleted = DeleteAuthMethod -uid $user -method $authMethod
+        if(!$deleted){
+        # Jeli jest blad, to zapamietujemy to, bo to oznacza, ze to jest metoda domyslna i musimy ja usunac na koncu
+        # Graph API nie wspiera odczytywania domyslnej metody
+        # Dodatkowo domyslna metoda moze byc usunieta tylko jako ostatnia.
+        # Aby zidentyfikowac te metode, nalezy sprawdzic blad.
+            $defaultMethod = $authMethod
+        }
+    }
+
+    
+    if($null -ne $defaultMethod){
+        Write-Host "Usuwanie motedy domyslnej"
+        $result = DeleteAuthMethod -uid $user -method $defaultMethod
+    }
+
+}
+
+Write-Progress -Activity "Przetwarzanie uzytkownikow" -Completed
