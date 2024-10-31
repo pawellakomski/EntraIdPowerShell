@@ -1,11 +1,34 @@
+
+
 Connect-MgGraph -Scopes "User.Read.All", "Policy.ReadWrite.AuthenticationMethod"
 
 $users = Import-CSV -Path c:\temp\users.csv -Header 'user' -Delimiter ';'
-$body = @{"perUserMfaState" = "disabled" }
+$allUsers = $users.Count
+$allUsers = $allUsers
 
-foreach ($user in $users)
+$body = @{"perUserMfaState" = "disabled" }
+$bar = 0
+$userObjects = @()
+$allUsers1 = $allUsers-1
+
+
+
+foreach ($index in 0..$allUsers1)
 {
+    $user = $users[$index]
+    
+    $procent = ($bar / $allUsers) * 100
+    $barParameters = @{
+        Activity        = "Przetwarzanie uzytkownikow"
+        Status          = "Uzytkownik nr $($index+1) z $allUsers - $($user) - Ukonczono $($procent -as [int])%"
+    }
+    Write-Progress @barParameters
+    $bar++
+
     $userid = Get-MgUser -userid $user.user | select id
     $id = $userid.id
+    $id
     Invoke-MgGraphRequest -Method PATCH -Uri "/beta/users/$id/authentication/requirements" -Body $body
 }
+
+Write-Progress -Activity "Przetwarzanie uzytkownikow" -Completed
