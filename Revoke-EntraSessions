@@ -1,0 +1,32 @@
+
+
+Connect-MgGraph -Scopes "User.Read.All", "User.RevokeSessions.All"
+
+$users = Import-CSV -Path c:\temp\users.csv -Header 'user' -Delimiter ';'
+$allUsers = $users.Count
+$bar = 0
+$allUsers1 = $allUsers-1
+
+
+foreach ($index in 0..$allUsers1)
+{
+    $user = $users[$index]
+    
+    $procent = ($bar / $allUsers) * 100
+    $barParameters = @{
+        Activity        = "Przetwarzanie uzytkownikow"
+        Status          = "Uzytkownik nr $($index+1) z $allUsers - $($user) - Ukonczono $($procent -as [int])%"
+    }
+    Write-Progress @barParameters
+    $bar++
+
+    $userid = Get-MgUser -userid $user.user | select id
+    $id = $userid.id
+    Revoke-MgUserSignInSession -UserId $id
+
+}
+
+Write-Progress -Activity "Przetwarzanie uzytkownikow" -Completed
+
+
+
