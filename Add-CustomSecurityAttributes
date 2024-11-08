@@ -1,0 +1,17 @@
+Connect-MgGraph -Scopes CustomSecAttributeAssignment.ReadWrite.All,User.Read.All
+
+$table = Import-Csv 'users.csv' | Group-Object -Property "nr kadrowy" | Where-Object { $_.count -lt 2 }
+
+foreach($element in $table){
+
+    if($element.Group[0].'Użytkownik Adres e-mail'){
+            $customSecurityAttributes = @{
+            "allUsers" = @{
+                "@odata.type" = "#Microsoft.DirectoryServices.CustomSecurityAttributeValue"
+                "empid" = $element.Group[0].'nr kadrowy'
+                "model" = $element.Group[0].'GSM Model_GSM'
+            }
+        }
+        Update-MgUser -UserId $element.Group[0].'Użytkownik Adres e-mail' -CustomSecurityAttributes $customSecurityAttributes
+    }
+}
